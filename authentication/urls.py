@@ -12,16 +12,16 @@ from .views import (
 )
 
 from rest_framework_simplejwt.views import (
-    TokenObtainPairView as UserRegisterView,
+    # TokenObtainPairView,
     TokenRefreshView,
     TokenVerifyView
 )
 
 urlpatterns = [
     # Authentication with Djoser JWT
-    # path('auth/register', UserRegisterView.as_view(), name='user-create'),
-    path('auth/refresh', TokenRefreshView.as_view(), name='user-create'),
-    path('auth/verify', TokenVerifyView.as_view(), name='user-create'),
+    path('auth/register', CreateUserView.as_view(), name='user-create'),
+    path('auth/refresh', TokenRefreshView.as_view(), name='user-refresh'),
+    path('auth/verify', TokenVerifyView.as_view(), name='user-verify'),
     path('auth/login', LoginView.as_view(), name="user-login"),
 
     path('users/', ListUsersView.as_view(), name='user-list'),
@@ -31,7 +31,7 @@ urlpatterns = [
     # Destory => DELETE
     path('users/<int:pk>', RetrieveUpdateDestroyUserView.as_view(), name='user-detail'),
 
-    path('teachers/add_course/',
+    path('teachers/<int:user_id>/add_course/<int:course_id>/',
          AddCourseToTeacherView.as_view(), name='teacher-course'),
 
     path('students/<int:user_id>/retrieve/',

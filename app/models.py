@@ -3,13 +3,18 @@ from django.db import models
 
 class Course(models.Model):
     name = models.CharField(max_length=255)
+    code = models.CharField(max_length=10)
 
     def __str__(self):
         return self.name
 
 
 class Lecture(models.Model):
-    date = models.DateTimeField()
+    name = models.CharField(max_length=255)
+    qr_exp_mins = models.IntegerField(default=1)
+    date = models.DateTimeField(auto_now_add=True)
+    Latitude = models.IntegerField()
+    Longitude = models.IntegerField()
     teacher = models.ForeignKey(
         "authentication.User",
         on_delete=models.CASCADE

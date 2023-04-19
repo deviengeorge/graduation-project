@@ -154,13 +154,14 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'EXCEPTION_HANDLER': 'app.exceptions.api_exception_handler',
 }
 
 SIMPLE_JWT = {
     'AUTH_USERNAME_FIELD': 'email',
     'AUTH_PASSWORD_FIELD': 'password',
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=60),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': True,
@@ -172,25 +173,14 @@ SIMPLE_JWT = {
     'USER_ID_CLAIM': 'user_id',
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
+    'TOKEN_OBTAIN_SERIALIZER': "authentication.serializers.CustomTokenObtainPairSerializer",
 }
 
 
 DJOSER = {
     # the field to use for login (defaults to 'username')
     'LOGIN_FIELD': 'email',
-    # send email when username is changed (defaults to False)
-    'USERNAME_CHANGED_EMAIL_CONFIRMATION': False,
-    # send email when password is changed (defaults to False)
-    'PASSWORD_CHANGED_EMAIL_CONFIRMATION': False,
-    # send email for account activation (defaults to False)
-    'SEND_ACTIVATION_EMAIL': False,
-    # send email for account confirmation (defaults to False)
-    'SEND_CONFIRMATION_EMAIL': False,
-    # require re-typing username on registration (defaults to False)
-    'SET_USERNAME_RETYPE': False,
-    # require re-typing password on registration (defaults to False)
-    'SET_PASSWORD_RETYPE': False,
-    'SERIALIZERS': {
-        'user_create': 'authentication.serializers.UserCreateSerializer',
-    },
+    # 'SERIALIZERS': {
+    #     'user_create': 'authentication.serializers.UserCreateSerializer',
+    # },
 }

@@ -50,10 +50,10 @@ class AddCourseToTeacherView(generics.UpdateAPIView):
     serializer_class = TeacherProfileSerializer
 
     def put(self, request, *args, **kwargs):
-        user_id = request.data.get('user_id')
-        course_id = request.data.get('course_id')
-        # user_id = kwargs.get('user_id', None)
-        # course_id = kwargs.get('course_id', None)
+        # user_id = request.data.get('user_id')
+        # course_id = request.data.get('course_id')
+        user_id = kwargs.get('user_id', None)
+        course_id = kwargs.get('course_id', None)
 
         try:
             course = Course.objects.get(id=course_id)

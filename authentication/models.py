@@ -32,6 +32,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     name = models.CharField(max_length=255)
     user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES)
+
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -54,10 +55,14 @@ class TeacherProfile(models.Model):
 
 class StudentProfile(models.Model):
     user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name='student_profile')
+        User,
+        on_delete=models.CASCADE,
+        related_name='student_profile'
+    )
     courses_attended = models.ManyToManyField(Course, related_name='students')
     grade = models.CharField(max_length=255)
     department = models.CharField(max_length=255)
+    student_id = models.CharField(max_length=9)
 
     def __str__(self):
         return self.user.email

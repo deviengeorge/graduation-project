@@ -1,7 +1,7 @@
 from rest_framework import generics
 from rest_framework.views import APIView
 from .models import Course, Lecture
-from .serializers import CourseSerializer, LectureSerializer
+from .serializers import CourseSerializer, LectureSerializer, AttendStudentSerializer
 
 
 class ListCoursesView(generics.ListCreateAPIView):
@@ -24,11 +24,17 @@ class RetrieveUpdateDestroyLecturesView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = LectureSerializer
 
 
-# GET
+class AttendStudentToLectureAPI(APIView):
+    # Create a New Lecture ( Teacher Prespective )
+    def post(self, request, *args, **kwargs):
 
-class AttendanceAPI(APIView):
-    def get(self, request, *args, **kwargs):
-        lecture_id = int(request.data.get('lecture_id', 1))
-        lecture = Lecture.objects.get(id=lecture_id)
+        validated_data = AttendStudentSerializer(
+            data={"lecture_id": request.data.get('lecture_id')})
+        print(validated_data)
+        # lecture = Lecture.objects.create(id=lecture_id)
 
-        return LectureSerializer(data=lecture)
+        # return LectureSerializer(data=lecture)
+
+
+# Teacher
+# create lecture

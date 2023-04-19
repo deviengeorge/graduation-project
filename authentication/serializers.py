@@ -1,19 +1,18 @@
 from rest_framework import serializers
 from .models import User, TeacherProfile, StudentProfile
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from app.serializers import CourseSerializer
 
-from djoser.serializers import UserCreateSerializer
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'name', 'user_type']
 
 
-# class UserSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = ['id', 'email', 'name', 'user_type']
-
-
-class UserCreateSerializer(UserCreateSerializer):
-    class Meta(UserCreateSerializer.Meta):
+class UserCreateSerializer(serializers.ModelSerializer):
+    class Meta:
         model = User
         fields = ['id', 'email', 'name', 'user_type', 'password']
         extra_kwargs = {'password': {'write_only': True}}
@@ -48,7 +47,6 @@ class TeacherProfileSerializer(serializers.ModelSerializer):
 
 
 class StudentProfileSerializer(serializers.ModelSerializer):
-
     courses_attended = CourseSerializer(many=True, read_only=True)
 
     class Meta:
@@ -64,3 +62,16 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'email', 'name',
                   'teacher_profile', 'student_profile', 'user_type']
+
+
+# Serializer for JWT Token in rest_framework_simple_jwt package
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        token['name'] = user.name
+        token['user_type'] = user.user_type
+        token['email'] = user.email
+
+        return token
