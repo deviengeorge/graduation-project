@@ -1,4 +1,4 @@
-.PHONY: test serve delete-migrations
+.PHONY: test serve migrate make-migrations delete-migrations
 
 test:
 	python3 manage.py test --failfast --keepdb

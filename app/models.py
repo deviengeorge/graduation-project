@@ -13,16 +13,11 @@ class Lecture(models.Model):
     name = models.CharField(max_length=255)
     qr_exp_mins = models.IntegerField(default=1)
     date = models.DateTimeField(auto_now_add=True)
-    Latitude = models.IntegerField()
-    Longitude = models.IntegerField()
-    teacher = models.ForeignKey(
-        "authentication.User",
-        on_delete=models.CASCADE
-    )
+    latitude = models.CharField(max_length=50)
+    longitude = models.CharField(max_length=50)
+    teacher = models.ForeignKey("authentication.User", on_delete=models.CASCADE)
     course = models.ForeignKey(
-        Course,
-        on_delete=models.CASCADE,
-        related_name="lectures"
+        Course, on_delete=models.CASCADE, related_name="lectures"
     )
 
     def __str__(self):
@@ -30,12 +25,26 @@ class Lecture(models.Model):
 
 
 class Attendance(models.Model):
-    student = models.ForeignKey(
-        "authentication.User",
-        on_delete=models.CASCADE
-    )
+    student = models.ForeignKey("authentication.User", on_delete=models.CASCADE)
     lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-# class Annoncement
+class Announcement(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.CharField(max_length=1000)
+    teacher = models.ForeignKey("authentication.User", on_delete=models.CASCADE)
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, related_name="announcements"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=[
+                    "teacher_id",
+                    "course_id",
+                ]
+            ),
+        ]
