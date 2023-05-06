@@ -1,13 +1,19 @@
 from rest_framework import generics, status
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
 # authentication folder
 from .models import User, TeacherProfile, StudentProfile
-from .serializers import UserSerializer, UserCreateSerializer, TeacherProfileSerializer, StudentProfileSerializer
+from .serializers import (
+    UserSerializer,
+    UserCreateSerializer,
+    TeacherProfileSerializer,
+    StudentProfileSerializer,
+)
+
+from . import permissions
 
 # app folder
 from app.models import Course
@@ -35,14 +41,26 @@ class CreateUserView(generics.CreateAPIView):
 
 
 class ListUsersView(generics.ListAPIView):
-    queryset = User.objects.all().select_related(
-        "teacher_profile", "student_profile")
+    def get_queryset(self):
+        """
+        Optionally restricts the returned purchases to a given user,
+        by filtering against a `username` query parameter in the URL.
+        """
+        queryset = User.objects.all().select_related(
+            "teacher_profile", "student_profile"
+        )
+        user_type = self.request.query_params.get("user_type")
+        if user_type is not None:
+            queryset = queryset.filter(user_type=user_type)
+        return queryset
+
     serializer_class = UserSerializer
 
 
 class RetrieveUpdateDestroyUserView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = User.objects.all()
+    queryset = User.objects.select_related("student_profile", "teacher_profile").all()
     serializer_class = UserSerializer
+    permission_classes = [permissions.IsAdminNotGETMethod]
 
 
 class AddCourseToTeacherView(generics.UpdateAPIView):
@@ -52,14 +70,17 @@ class AddCourseToTeacherView(generics.UpdateAPIView):
     def put(self, request, *args, **kwargs):
         # user_id = request.data.get('user_id')
         # course_id = request.data.get('course_id')
-        user_id = kwargs.get('user_id', None)
-        course_id = kwargs.get('course_id', None)
+        user_id = kwargs.get("user_id", None)
+        course_id = kwargs.get("course_id", None)
 
         try:
             course = Course.objects.get(id=course_id)
 
         except Course.DoesNotExist:
-            return Response({'message': 'Course not in the database.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"message": "Course not in the database."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
         try:
             teacher_profile = TeacherProfile.objects.get(user__id=user_id)
@@ -69,13 +90,21 @@ class AddCourseToTeacherView(generics.UpdateAPIView):
             if course not in teacher_profile.courses_taught.all():
                 teacher_profile.courses_taught.add(course)
                 teacher_profile.save()
-                return Response({'message': 'Course added to teacher.'}, status=status.HTTP_200_OK)
+                return Response(
+                    {"message": "Course added to teacher."}, status=status.HTTP_200_OK
+                )
 
             else:
-                return Response({'message': 'Course already in teacher courses.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"message": "Course already in teacher courses."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         except TeacherProfile.DoesNotExist:
-            return Response({'message': 'Teacher profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"message": "Teacher profile not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
 
 class RetrieveStudentView(generics.RetrieveAPIView):
@@ -85,8 +114,8 @@ class RetrieveStudentView(generics.RetrieveAPIView):
 
 class LoginView(APIView):
     def post(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
+        email = request.data.get("email")
+        password = request.data.get("password")
 
         user = authenticate(request, email=email, password=password)
 
@@ -94,12 +123,14 @@ class LoginView(APIView):
             login(request, user)
             refresh = RefreshToken.for_user(user)
 
-            return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            })
+            return Response(
+                {
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                }
+            )
 
-        return Response({'error': 'Invalid credentials'})
+        return Response({"error": "Invalid credentials"})
 
 
 class EnrollCourseView(generics.UpdateAPIView):
@@ -108,20 +139,23 @@ class EnrollCourseView(generics.UpdateAPIView):
 
     @csrf_exempt
     def put(self, request, *args, **kwargs):
-
-        user_id = kwargs.get('user_id', None)
-        course_id = kwargs.get('course_id', None)
-        grade = request.data.get('grade', None)
-        department = request.data.get('department', None)
+        user_id = kwargs.get("user_id", None)
+        course_id = kwargs.get("course_id", None)
+        grade = request.data.get("grade", None)
+        department = request.data.get("department", None)
 
         if not all([user_id, course_id, grade, department]):
-            return Response({'message': 'Missing parameters'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "Missing parameters"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             course = Course.objects.get(id=course_id)
 
         except Course.DoesNotExist:
-            return Response({'message': 'Course does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"message": "Course does not exist."}, status=status.HTTP_404_NOT_FOUND
+            )
 
         student_profile = get_object_or_404(StudentProfile, user__id=user_id)
 
@@ -130,7 +164,11 @@ class EnrollCourseView(generics.UpdateAPIView):
             student_profile.grade = grade
             student_profile.department = department
             student_profile.save()
-            return Response({'message': 'Student enrolled in course.'}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Student enrolled in course."}, status=status.HTTP_200_OK
+            )
 
         else:
-            return Response({'message': 'Student not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"message": "Student not found."}, status=status.HTTP_404_NOT_FOUND
+            )

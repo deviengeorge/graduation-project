@@ -23,7 +23,17 @@ def api_exception_handler(exc: Exception, context) -> Response:
 
         error_payload["status_code"] = status_code
         error_payload["message"] = http_code_to_message[status_code]
-        error_payload["errors"] = {key: value[0]
-                                   for (key, value) in response.data.items()}
+
+        print(response.data)
+
+        if "detail" in response.data:
+            if response.data["detail"].code == "permission_denied":
+                error_payload["message"] = "Permission Denied"
+            elif response.data["detail"].code == "not_authenticated":
+                error_payload["message"] = "Not Authenticated"
+        else:
+            error_payload["errors"] = {
+                key: value[0] for (key, value) in response.data.items()
+            }
         response.data = error_payload
     return response

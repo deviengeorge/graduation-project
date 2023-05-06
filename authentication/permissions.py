@@ -44,3 +44,11 @@ class IsAdminOrTeacherNotGETMethod(permissions.BasePermission):
             return True
 
         return IsAdminOrTeacher().has_permission(request, view)
+
+
+class IsAdminNotGETMethod(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method == "GET":
+            return True
+
+        return IsAdmin().has_permission(request, view)

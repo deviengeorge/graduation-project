@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "djoser",
+    # "djoser",
     "rest_framework_simplejwt",
     "authentication",
     "app",
@@ -154,7 +154,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    # 'EXCEPTION_HANDLER': 'app.exceptions.api_exception_handler',
+    "EXCEPTION_HANDLER": "app.exceptions.api_exception_handler",
 }
 
 SIMPLE_JWT = {
@@ -174,10 +174,4 @@ SIMPLE_JWT = {
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
     "TOKEN_TYPE_CLAIM": "token_type",
     "TOKEN_OBTAIN_SERIALIZER": "authentication.serializers.CustomTokenObtainPairSerializer",
-}
-
-
-DJOSER = {
-    # the field to use for login (defaults to 'username')
-    "LOGIN_FIELD": "email",
 }

@@ -8,23 +8,23 @@ from app.serializers import CourseSerializer
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'name', 'user_type']
+        fields = ["id", "email", "name", "user_type"]
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'name', 'user_type', 'password']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ["id", "email", "name", "user_type", "password"]
+        extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
         user = User(
-            email=validated_data['email'],
-            name=validated_data['name'],
-            user_type=validated_data['user_type']
+            email=validated_data["email"],
+            name=validated_data["name"],
+            user_type=validated_data["user_type"],
         )
 
-        user.set_password(validated_data['password'])
+        user.set_password(validated_data["password"])
         user.save()
 
         if user.user_type == user.TEACHER:
@@ -43,7 +43,7 @@ class TeacherProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TeacherProfile
-        fields = ['courses_taught']
+        fields = ["courses_taught"]
 
 
 class StudentProfileSerializer(serializers.ModelSerializer):
@@ -51,7 +51,7 @@ class StudentProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StudentProfile
-        fields = ['courses_attended', 'grade', 'department']
+        fields = ["courses_attended", "grade", "department", "mac_token"]
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -60,8 +60,14 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'name',
-                  'teacher_profile', 'student_profile', 'user_type']
+        fields = [
+            "id",
+            "email",
+            "name",
+            "teacher_profile",
+            "student_profile",
+            "user_type",
+        ]
 
 
 # Serializer for JWT Token in rest_framework_simple_jwt package
@@ -70,8 +76,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
 
-        token['name'] = user.name
-        token['user_type'] = user.user_type
-        token['email'] = user.email
+        token["name"] = user.name
+        token["user_type"] = user.user_type
+        token["email"] = user.email
 
         return token
